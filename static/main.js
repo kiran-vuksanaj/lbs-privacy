@@ -131,3 +131,74 @@ async function queryPeers(request) {
 }
 
 // end peerJS connection code
+let map
+let service
+let infowindow
+
+let start = Date.now()
+
+// -33.8665433,151.1956316
+
+function callNewMap(data) {
+    start = Date.now();
+    
+    lat = data.lat.value
+    long = data.long.value
+    type = data.type.value
+
+    console.log(data)
+    console.log(lat)
+    console.log(long)
+
+    var loc = new google.maps.LatLng(lat, long);
+
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: loc,
+        zoom: 15
+        });
+    
+    var request = {
+            location: loc,
+            radius: '500',
+            type: [type]
+        };
+
+    service = new google.maps.places.PlacesService(map);
+    service.nearbySearch(request, callback);
+
+    console.log("mapped!")
+
+    
+}
+
+function initMap() {
+    console.log('hi')
+
+}
+    
+function callback(results, status) {
+    if (status == google.maps.places.PlacesServiceStatus.OK) {
+        for (var i = 0; i < results.length; i++) {
+        createMarker(results[i]);
+        }
+    }
+    const end = Date.now();
+    console.log(`Execution time: ${end - start} ms`);
+}
+
+function createMarker(place) {
+    if (!place.geometry || !place.geometry.location) return;
+
+    const marker = new google.maps.Marker({
+        map,
+        position: place.geometry.location,
+    });
+
+    google.maps.event.addListener(marker, "click", () => {
+        infowindow.setContent(place.name || "");
+        infowindow.open(map);
+    });
+
+ }
+
+window.initMap = initMap;

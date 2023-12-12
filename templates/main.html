@@ -7,7 +7,34 @@
   </head>
   <body>
     <h2>lbs</h2>
-    <p> Hello! this is written in /templates/main.html.  </p>
+
+    <form id="form" class="myform" onSubmit="JavaScript:handleClick()">
+      Search Nearby Places of a particular type
+      <div class="box">
+        <p>Latitude: <input type="number" name="lat" value="-33.8665433"></p>
+        <p>Longitude: <input type="number" name="long" value="151.1956316"></p>
+        <p>Query:
+          <select name="type" id="lang">
+            <option value="restaurants">Restaurants</option>
+            <option value="gas stations">Gas Stations</option>
+            <option value="hotels">Hotels</option>
+            <option value="cafes">Cafes</option>
+          </select>
+        </p>
+      </div>
+      <button type="button" onClick="JavaScript:callNewMap(this.form)">Submit</button>
+    </form>
+
+
+    <script src="static/main.js"></script>
+
+    <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCDN6nIJQXOKOfFyrntkcNUVrxRh8Yur9A&callback=initMap&libraries=places&v=weekly"
+    defer
+    ></script>
+
+    <div id="map"></div>
+
 
 
     <!-- javascript files -->

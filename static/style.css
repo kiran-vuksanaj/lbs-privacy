@@ -1,3 +1,23 @@
 body {
     background-color: #DDEAC3; 	/* coolors.co Nyanza*/
 }
+
+#map {
+    height: 70vh;
+    width: 100vw;
+}
+  
+.box {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.box * {
+    margin-right: 20px;
+    width: 30%;
+}
+
+.myform {
+    padding: 20px;
+}
