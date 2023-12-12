@@ -1,6 +1,21 @@
 console.log('hi')
 
 
+// **** Dummy Location Generation ****
+const RADIUS_INCR_RATIO = 1.4;
+
+function dummyLocation(point,radius){
+    // point: {'lat':n,'lng':n}
+    const bearing = Math.random()*360;
+    const distance = (RADIUS_INCR_RATIO-1)*radius;
+    const new_point = geolib.computeDestinationPoint(point,distance,bearing);
+    const new_radius = radius*RADIUS_INCR_RATIO;
+    return {'point':new_point,'radius':new_radius};
+    
+}
+
+// **** end dummy location gen ****
+
 // **** PeerJS CONNECTIONS ****
 
 var peer = new Peer();
