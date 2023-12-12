@@ -5,7 +5,7 @@ console.log('hi')
 
 var peer = new Peer();
 var PEER_ID = -1;
-const TIMEOUT_MS = 10000;
+const TIMEOUT_MS = 5000;
 
 
 peer.on('open', function(id) {
@@ -53,13 +53,14 @@ function doRequest(request,pid) {
     });
 }
 
-async function queryPeers() {
-    const request = {
-	'type':'request',
-	'latlng':(4,4),
-	'radius':30,
-	'query':'restaurants'
-    };
+async function queryPeers(request) {
+    // sample request! make sure to include 'type':'request', otherwise use the data as expected by other modules
+    // const request = {
+    // 	'type':'request',
+    // 	'latlng':(4,4),
+    // 	'radius':30,
+    // 	'query':'restaurants'
+    // };
 	    
     $.get('/api/get_group', function(data) {
 	const peer_ids = data['peer_ids'];
