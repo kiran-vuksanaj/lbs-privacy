@@ -14,7 +14,7 @@
         <p>Latitude: <input type="number" name="lat" value="-33.8665433"></p>
         <p>Longitude: <input type="number" name="long" value="151.1956316"></p>
         <p>Query:
-          <select name="type" id="lang">
+          <select name="query" id="lang">
             <option value="restaurants">Restaurants</option>
             <option value="gas stations">Gas Stations</option>
             <option value="hotels">Hotels</option>
@@ -23,6 +23,7 @@
         </p>
         <p>Dummy: <input type="checkbox" name="dummy"></p>
         <p>Caching: <input type="checkbox" name="caching"></p>
+        <p>Peers: <input type="checkbox" name="peers"></p>
       </div>
       <button type="button" onClick="JavaScript:callNewMap(this.form)">Submit</button>
     </form>
@@ -33,6 +34,8 @@
     ></script>
 
     <div id="map"></div>
+
+    <div id="fake_map"></div>
 
 
 
