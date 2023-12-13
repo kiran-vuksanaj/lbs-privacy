@@ -1,4 +1,150 @@
-console.log('hi')
+// const { geolib } = require("./geolib")
+
+// map generation code
+let map
+let service
+let infowindow
+
+let start = Date.now()
+let dummy = false
+let mostRecentLoc = NaN
+let mostRecentRad = NaN
+let mostRecentType = NaN
+
+// -33.8665433,151.1956316
+
+let cache = {
+	'restaurants': new Set(),
+	'gas stations': new Set(),
+	'hotels': new Set(),
+	'cafes': new Set(),
+}
+
+function callNewMap(data) {
+
+    start = Date.now();
+    
+    lat = data.lat.value
+    long = data.long.value
+    type = data.type.value
+	dummy = data.dummy.checked
+	caching = data.caching.checked
+
+    var loc = new google.maps.LatLng(lat, long);
+	var rad = '500'
+
+	// map still centers on original
+	map = new google.maps.Map(document.getElementById('map'), {
+        center: loc,
+        zoom: 15
+        });
+
+	// see if there are any that match up
+	if (caching) {
+		personalCache = checkCache(loc, rad, type)
+	} else {
+		personalCache = []
+	}
+
+	// if nothing cached, make dummy location and rad
+	if (dummy) {
+		dummyLoc = dummyLocation({'latitude': lat, 'longitude': long}, rad)
+		loc = new google.maps.LatLng(dummyLoc.point.latitude,dummyLoc.point.longitude)
+		rad = dummyLoc.radius
+	}
+	// in the case of dummy
+	mostRecentLoc = {'latitude': parseFloat(lat), 'longitude': parseFloat(long)}
+	mostRecentRad = parseInt('500')
+	mostRecentType = type
+
+    var request = {
+            location: loc,
+            radius: rad,
+            type: [type]
+        };
+
+
+	if (personalCache.length > 0) {
+		callback(personalCache, google.maps.places.PlacesServiceStatus.OK)
+
+		console.log("used cached info")
+	} else {
+		service = new google.maps.places.PlacesService(map);
+		service.nearbySearch(request, callback);
+		console.log("did not use cached info")
+	}
+
+    console.log("mapped!")
+}
+
+function initMap() {
+    console.log('hi')
+}
+
+
+function checkCache(location, radius, type) {
+	points = cache[type]
+
+	console.log(points)
+
+	out = []
+	for (const place of points) {
+		placeLoc = {'latitude': place.geometry.location.lat(),'longitude': place.geometry.location.lng()}
+		if (!isMarkerOutsideCircle(placeLoc, location, radius)) {
+			out.push(place)
+		}
+	}
+	console.log(out)
+	return out
+
+}
+    
+function callback(results, status) {
+
+    if (status == google.maps.places.PlacesServiceStatus.OK) {
+        for (var i = 0; i < results.length; i++) {
+        createMarker(results[i]);
+        }
+    }
+    const end = Date.now();
+    console.log(`Execution time: ${end - start} ms`);
+
+}
+
+function createMarker(place) {
+    if (!place.geometry || !place.geometry.location) return;
+
+	if (true) {
+		if (isMarkerOutsideCircle(
+			{'latitude': place.geometry.location.lat(), 'longitude': place.geometry.location.lng()}, 
+			mostRecentLoc,
+			mostRecentRad)) {
+			console.log("passed")
+			return
+		}
+	}
+
+    const marker = new google.maps.Marker({
+        map,
+        position: place.geometry.location,
+    });
+
+	cache[mostRecentType].add(place)
+
+    google.maps.event.addListener(marker, "click", () => {
+        infowindow.setContent(place.name || "");
+        infowindow.open(map);
+    });
+
+ }
+
+function isMarkerOutsideCircle(point1, point2, r) 
+  {
+	console.log(geolib.getDistance(point1, point2))
+	return geolib.getDistance(point1, point2) > 2*r
+  }
+
+// end map gen code
 
 
 // **** Dummy Location Generation ****
@@ -7,11 +153,11 @@ const RADIUS_INCR_RATIO = 1.4;
 function dummyLocation(point,radius){
     // point: {'lat':n,'lng':n}
     const bearing = Math.random()*360;
-    const distance = (RADIUS_INCR_RATIO-1)*radius;
+    // const distance = (RADIUS_INCR_RATIO-1)*radius;
+	const distance = Math.random()*(RADIUS_INCR_RATIO-1)*radius;
     const new_point = geolib.computeDestinationPoint(point,distance,bearing);
     const new_radius = radius*RADIUS_INCR_RATIO;
-    return {'point':new_point,'radius':new_radius};
-    
+    return {'point':new_point,'radius':new_radius}; 
 }
 
 // **** end dummy location gen ****
@@ -21,7 +167,6 @@ function dummyLocation(point,radius){
 var peer = new Peer();
 var PEER_ID = -1;
 const TIMEOUT_MS = 5000;
-
 
 peer.on('open', function(id) {
     console.log('My peer ID is: '+id);
@@ -131,74 +276,89 @@ async function queryPeers(request) {
 }
 
 // end peerJS connection code
-let map
-let service
-let infowindow
 
-let start = Date.now()
 
-// -33.8665433,151.1956316
 
-function callNewMap(data) {
-    start = Date.now();
-    
-    lat = data.lat.value
-    long = data.long.value
-    type = data.type.value
 
-    console.log(data)
-    console.log(lat)
-    console.log(long)
 
-    var loc = new google.maps.LatLng(lat, long);
 
-    map = new google.maps.Map(document.getElementById('map'), {
-        center: loc,
-        zoom: 15
-        });
-    
-    var request = {
-            location: loc,
-            radius: '500',
-            type: [type]
-        };
 
-    service = new google.maps.places.PlacesService(map);
-    service.nearbySearch(request, callback);
 
-    console.log("mapped!")
 
-    
-}
 
-function initMap() {
-    console.log('hi')
 
-}
-    
-function callback(results, status) {
-    if (status == google.maps.places.PlacesServiceStatus.OK) {
-        for (var i = 0; i < results.length; i++) {
-        createMarker(results[i]);
-        }
-    }
-    const end = Date.now();
-    console.log(`Execution time: ${end - start} ms`);
-}
 
-function createMarker(place) {
-    if (!place.geometry || !place.geometry.location) return;
 
-    const marker = new google.maps.Marker({
-        map,
-        position: place.geometry.location,
-    });
 
-    google.maps.event.addListener(marker, "click", () => {
-        infowindow.setContent(place.name || "");
-        infowindow.open(map);
-    });
 
- }
 
-window.initMap = initMap;
+
+
+
+
+
+
+
+
+// when to return cache info back to user?
+// when to send cache info to peer?
+// checks
+
+// any points in circle = success
+// limitation of implementation, but this is just a proof of concept
+
+// not req - response
+// instead all items w/ lat and long; query points in lat and long
+
+// // Declare a global variable for the cache
+// var globalCache = null;
+
+// // Function to initialize the global cache
+// async function initializeGlobalCache() {
+//   try {
+//     // Open the cache
+//     globalCache = await caches.open('my-global-cache');
+//   } catch (error) {
+//     console.error('Error initializing global cache:', error);
+//   }
+// }
+
+// // Use the globalCache variable in other functions or parts of your code
+// async function addToGlobalCache(key, value) {
+//   try {
+//     if (!globalCache) {
+//       await initializeGlobalCache();
+//     }
+
+//     // Add to the cache
+//     await globalCache.put(key, new Response(value));
+
+// 	console.log(key)
+
+// 	keys_list = await globalCache.keys()
+// 	console.log(keys_list)
+
+//   } catch (error) {
+//     console.error('Error adding to global cache:', error);
+//   }
+// }
+
+
+
+// const cachesToThrow = ['my-global-cache'];
+	
+// caches.keys().then((keyList) =>
+// Promise.all(
+// 	keyList.map((key) => {
+// 	if (cachesToThrow.includes(key)) {
+// 		return caches.delete(key);
+// 	}
+// 	}),
+// ),
+// ),
+
+
+
+// initializeGlobalCache()
+
+// addToGlobalCache(new Request(JSON.stringify([oldLoc.latitude, oldLoc.longitude, oldRad, oldType])), results)
